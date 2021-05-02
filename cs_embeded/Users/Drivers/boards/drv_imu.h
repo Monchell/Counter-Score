@@ -78,12 +78,12 @@ extern "C" {
 #define MPU_TEMP_OUTH_REG		0X41	//温度值高八位寄存器
 #define MPU_TEMP_OUTL_REG		0X42	//温度值低8位寄存器
 
-#define MPU_GYRO_XOUTH_REG		0X43	//陀螺仪值,X轴高8位寄存器
-#define MPU_GYRO_XOUTL_REG		0X44	//陀螺仪值,X轴低8位寄存器
-#define MPU_GYRO_YOUTH_REG		0X45	//陀螺仪值,Y轴高8位寄存器
-#define MPU_GYRO_YOUTL_REG		0X46	//陀螺仪值,Y轴低8位寄存器
-#define MPU_GYRO_ZOUTH_REG		0X47	//陀螺仪值,Z轴高8位寄存器
-#define MPU_GYRO_ZOUTL_REG		0X48	//陀螺仪值,Z轴低8位寄存器
+#define MPU_GYRO_XOUTH_REG		0X43	//陀螺仪角速度值,X轴高8位寄存器
+#define MPU_GYRO_XOUTL_REG		0X44	//陀螺仪角速度值,X轴低8位寄存器
+#define MPU_GYRO_YOUTH_REG		0X45	//陀螺仪角速度值,Y轴高8位寄存器
+#define MPU_GYRO_YOUTL_REG		0X46	//陀螺仪角速度值,Y轴低8位寄存器
+#define MPU_GYRO_ZOUTH_REG		0X47	//陀螺仪角速度值,Z轴高8位寄存器
+#define MPU_GYRO_ZOUTL_REG		0X48	//陀螺仪角速度值,Z轴低8位寄存器
 
 #define MPU_I2CSLV0_DO_REG		0X63	//IIC从机0数据寄存器
 #define MPU_I2CSLV1_DO_REG		0X64	//IIC从机1数据寄存器
@@ -125,7 +125,7 @@ typedef struct {
 uint8_t IIC_MPU6050_Read_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf); //IIC连续读
 uint8_t IIC_MPU6050_Write_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf);
 void imu_config(void);		//初始化MPU6050接口函数
-void mpu_get_data(struct ahrs_sensor *sensor);
+void mpu_get_data(struct ahrs_sensor *sensor);  //读取六轴数据
 uint8_t IIC_MPU6050_Init(void);
 
 extern MPU6050_t MPU6050;        //MPU6050读取数据

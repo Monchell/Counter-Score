@@ -2881,7 +2881,7 @@ unsigned char run_self_test(void)
 	//char test_packet[4] = {0};
 	long gyro[3], accel[3];
 	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x3)
+	if (result == 0x03)
 	{
 		/* Test passed. We can trust the gyro data here, so let's push it down
 		* to the DMP.
@@ -2894,10 +2894,10 @@ unsigned char run_self_test(void)
 		gyro[2] = (long)(gyro[2] * sens);
 		dmp_set_gyro_bias(gyro);
 		mpu_get_accel_sens(&accel_sens);
-		accel[0] *= accel_sens;
-		accel[1] *= accel_sens;
-		accel[2] *= accel_sens;
-		dmp_set_accel_bias(accel);
+//		accel[0] *= accel_sens;
+//		accel[1] *= accel_sens;
+//		accel[2] *= accel_sens;
+//		dmp_set_accel_bias(accel);
 		return 0;
 	}else return 1;
 }

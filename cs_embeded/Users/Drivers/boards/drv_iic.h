@@ -8,9 +8,9 @@
   * @version 1.0
   * @date	2019.06.23
   * @editby
+  
 	******************************************************************************
 */
-
 #ifndef _DRV_IIC_H_
 #define _DRV_IIC_H_
 #ifdef __cplusplus
@@ -27,6 +27,8 @@ extern "C" {
 /* Private function prototypes -----------------------------------------------*/
 extern GPIO_TypeDef *SDA_GPIOx;
 extern uint16_t SDA_PIN;
+extern GPIO_TypeDef *SCL_GPIOx;
+extern uint16_t SCL_PIN;
 
 //IIC所有操作函数
 void IIC_Init(void);                //初始化IIC的IO口

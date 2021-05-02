@@ -157,14 +157,12 @@ uint8_t IIC_MPU6050_Init(void)
 {
     uint8_t res;
     IIC_Init();//初始化IIC总线
-    IIC_MPU6050_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
-    delay_ms_nos(100);
-
-    IIC_MPU6050_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050
-
+    IIC_MPU6050_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050 
+	delay_ms_nos(100);
+	IIC_MPU6050_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050
     IIC_MPU6050_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
-    IIC_MPU6050_Set_Accel_Fsr(2);					//加速度传感器,±2g
-    IIC_MPU6050_Set_Rate(500);						//设置采样率50Hz
+    IIC_MPU6050_Set_Accel_Fsr(80);					//加速度传感器,±2g
+    IIC_MPU6050_Set_Rate(1000);						//设置采样率50Hz
 
     IIC_MPU6050_Write_Byte(MPU_INT_EN_REG,0X00);	//关闭所有中断
     IIC_MPU6050_Write_Byte(MPU_USER_CTRL_REG,0X00);	//I2C主模式关闭
@@ -224,7 +222,7 @@ void imu_config(void)
     while(IIC_MPU6050_Init()) {
         //        u1_printf("MPU Init Error\r\n");
     }
-    MPU6050_Cal();			//算出零偏
+    //MPU6050_Cal();			//算出零偏
 }
 
 /**
@@ -332,28 +330,23 @@ uint8_t IIC_MPU6050_Write_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
 void mpu_get_data(struct ahrs_sensor *sensor)
 {
     uint8_t buf[14];
-    if(IIC_MPU6050_Read_Len(MPU_ADDR,MPU_GYRO_XOUTH_REG,6,buf)==0)
+    if(IIC_MPU6050_Read_Len(MPU_ADDR,MPU_ACCEL_XOUTH_REG,14,buf)==0)
         //缩短时间，不解算姿态的情况下只获取所需的陀螺仪GYO3轴数据
     {
-//		MPU6050.ax = ((buf[0]<<8) | buf[1]) - MPU6050.ax_offset;
-//		MPU6050.ay = ((buf[2]<<8) | buf[3]) - MPU6050.ay_offset;
-//		MPU6050.az = ((buf[4]<<8) | buf[5]) - MPU6050.az_offset - 4096;
+//如果要加速度值需要换寄存器
+		MPU6050.ax = ((buf[0]<<8) | buf[1]) ;//- MPU6050.ax_offset;
+		MPU6050.ay = ((buf[2]<<8) | buf[3]);// - MPU6050.ay_offset;
+		MPU6050.az = ((buf[4]<<8) | buf[5]) ;//- MPU6050.az_offset - 4096;
 
-        MPU6050.gx = (int16_t)(((buf[0]<<8) | buf[1]) - MPU6050.gx_offset);
-        MPU6050.gy = (int16_t)(((buf[2]<<8) | buf[3]) - MPU6050.gy_offset);
-        MPU6050.gz = (int16_t)(((buf[4]<<8) | buf[5]) - MPU6050.gz_offset);
+        MPU6050.gx = (int16_t)(((buf[8]<<8) | buf[9])) ;//- MPU6050.gx_offset);
+        MPU6050.gy = (int16_t)(((buf[10]<<8) | buf[11])) ;//- MPU6050.gy_offset);
+        MPU6050.gz = (int16_t)(((buf[12]<<8) | buf[13])) ;//- MPU6050.gz_offset);
 
-//		MPU6050.ax = ((buf[0]<<8) | buf[1]);
-//		MPU6050.ay = ((buf[2]<<8) | buf[3]);
-//		MPU6050.az = ((buf[4]<<8) | buf[5]);
-//
-//		MPU6050.gx = ((buf[8]<<8)  | buf[9]);
-//		MPU6050.gy = ((buf[10]<<8) | buf[11]);
-//		MPU6050.gz = ((buf[12]<<8) | buf[13]);
+
     }
-//	sensor->ax = MPU6050.ax / 4096.0f * 9.80665f;//2g -> m/s^2
-//	sensor->ay = MPU6050.ay / 4096.0f * 9.80665f;
-//	sensor->az = MPU6050.az / 4096.0f * 9.80665f;
+	sensor->ax = MPU6050.ax / 4096.0f * 9.80665f;//2g -> m/s^2
+	sensor->ay = MPU6050.ay / 4096.0f * 9.80665f;
+	sensor->az = MPU6050.az / 4096.0f * 9.80665f;
     sensor->wx = MPU6050.gx / 32768.0f * 2000;//2000dps->rad/s
     sensor->wy = MPU6050.gy / 32768.0f * 2000;
     sensor->wz = MPU6050.gz / 32768.0f * 2000;

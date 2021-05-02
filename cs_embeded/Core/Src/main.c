@@ -27,7 +27,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define LED_TURN HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13)
+#include "System_Config.h"
+#include "drv_timer.h"
+#include "drv_imu.h"
+#include "inv_mpu.h"
+#include "mahony_ahrs.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,11 +42,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LED_TURN HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+int count=0;
+struct ahrs_sensor mpu_sensor;
+struct attitude head_attitude;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -94,7 +102,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-	
+  board_config();  
+  delay_ms_nos(3000);
+  LED_TURN;
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -107,9 +117,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */	
+	  //6551
+    /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
-	  LED_TURN;
+	  
+	count+=1;
+	delay_ms_nos(3);
+	mpu_get_data(&mpu_sensor);	
+	mpu_dmp_get_data(&(head_attitude.roll),&(head_attitude.pitch),&(head_attitude.yaw));
   }
   /* USER CODE END 3 */
 }

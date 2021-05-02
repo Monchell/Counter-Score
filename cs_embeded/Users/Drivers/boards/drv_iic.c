@@ -29,6 +29,8 @@
 #include "drv_timer.h"
 GPIO_TypeDef *SDA_GPIOx;
 uint16_t SDA_PIN;
+GPIO_TypeDef *SCL_GPIOx;
+uint16_t SCL_PIN;
 /* Private function prototypes -----------------------------------------------*/
 /**
 * @brief IIC初始化
@@ -37,10 +39,17 @@ uint16_t SDA_PIN;
 */
 void IIC_Init(void)
 {
+	//初始化SCL引脚
+	GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitStruct.Pin = SCL_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(SCL_GPIOx, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(SCL_GPIOx, SCL_PIN, GPIO_PIN_SET); 
     IIC_SCL(1);
     IIC_SDA(1);
 }
-
 
 /**
 * @brief 产生IIC起始信号
@@ -197,8 +206,8 @@ uint8_t IIC_Read_Byte(unsigned char ack)
 void IIC_SCL(const char x)
 {
     /* ip暑输出高低电平 */
-    (x!=0)?HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_SET):\
-    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
+    (x!=0)?HAL_GPIO_WritePin(SCL_GPIOx,SCL_PIN,GPIO_PIN_SET):\
+    HAL_GPIO_WritePin(SCL_GPIOx,SCL_PIN,GPIO_PIN_RESET);
 }
 
 /**
@@ -209,8 +218,8 @@ void IIC_SCL(const char x)
 void IIC_SDA(const char x)
 {
     /* ip暑输出高低电平 */
-    (x!=0)?HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET):\
-    HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
+    (x!=0)?HAL_GPIO_WritePin(SDA_GPIOx,SDA_PIN,GPIO_PIN_SET):\
+    HAL_GPIO_WritePin(SDA_GPIOx,SDA_PIN,GPIO_PIN_RESET);
 }
 
 /**
@@ -220,12 +229,11 @@ void IIC_SDA(const char x)
   */
 void SDA_IN(void)
 {
-     GPIO_InitTypeDef GPIO_InitStruct = {
-        .Pin = SDA_PIN,
-        .Mode = GPIO_MODE_INPUT,
-        .Pull = GPIO_PULLUP,
-        .Speed = GPIO_SPEED_FREQ_LOW,
-    };
+     GPIO_InitTypeDef GPIO_InitStruct;
+     GPIO_InitStruct.Pin = SDA_PIN;
+     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+     GPIO_InitStruct.Pull = GPIO_PULLUP;
+     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(SDA_GPIOx, &GPIO_InitStruct);
 }
 
@@ -236,12 +244,11 @@ void SDA_IN(void)
   */
 void SDA_OUT(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {
-        .Pin = SDA_PIN,
-        .Mode = GPIO_MODE_OUTPUT_PP,
-        .Pull = GPIO_PULLDOWN,
-        .Speed = GPIO_SPEED_FREQ_LOW,
-    };
+	GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitStruct.Pin = SDA_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(SDA_GPIOx, &GPIO_InitStruct);
     HAL_GPIO_WritePin(SDA_GPIOx, SDA_PIN, GPIO_PIN_RESET);    
 }
@@ -253,7 +260,7 @@ void SDA_OUT(void)
   */
 GPIO_PinState READ_SDA(void)
 {
-	return (GPIO_PinState)HAL_GPIO_ReadPin(SDA_GPIOx, SDA_PIN) == GPIO_PIN_SET;    
+	return HAL_GPIO_ReadPin(SDA_GPIOx, SDA_PIN);    
 }
 /************************ COPYRIGHT SCUT-ROBOTLAB *****END OF FILE*************/
 
