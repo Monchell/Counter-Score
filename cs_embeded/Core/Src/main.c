@@ -23,12 +23,11 @@
 #include "cmsis_os.h"
 #include "tim.h"
 #include "usart.h"
-#include "delay.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define LED_TURN HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13)
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,9 +107,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
+    /* USER CODE END WHILE */	
     /* USER CODE BEGIN 3 */
+	  LED_TURN;
   }
   /* USER CODE END 3 */
 }

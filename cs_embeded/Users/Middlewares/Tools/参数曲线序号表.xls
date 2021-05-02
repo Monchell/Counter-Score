@@ -1,0 +1,16 @@
+Rate_Tar	0
+Rate_Cur	1
+Rate_Out	2
+Rate_Kp	3
+Rate_Ki	4
+Rate_Kd	5
+Rate_Pterm	6
+Rate_Iterm	7
+Rate_Dterm	8
+Angle_Tar	9
+Angle_Cur	10
+Angle_Out	11
+Angle_Kp	12
+Angle_Ki	13
+Angle_Kd	14
+Speedmode	15
