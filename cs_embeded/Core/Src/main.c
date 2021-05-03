@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,6 +29,7 @@
 #include "System_Config.h"
 #include "drv_timer.h"
 #include "drv_imu.h"
+#include "drv_iic.h"
 #include "inv_mpu.h"
 #include "mahony_ahrs.h"
 
@@ -37,19 +37,22 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+void mpu_get(gyro_module *aim_gyro);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define LED_TURN HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13)
+#define LED_OFF HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET)
+#define LED_ON HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-int count=0;
-struct ahrs_sensor mpu_sensor;
-struct attitude head_attitude;
+#define gyro_count 30 
+uint32_t gyrotimer=0;
+uint32_t tickcount=0;
+uint32_t timer;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -60,7 +63,6 @@ struct attitude head_attitude;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -102,30 +104,31 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  LED_OFF;
   board_config();  
-  delay_ms_nos(3000);
-  LED_TURN;
+  gyrotimer=Get_SystemTimer();
+  LED_ON;
   /* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
-  //MX_FREERTOS_Init(); 
-  /* Start scheduler */
-  //osKernelStart();
- 
-  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //6551
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  
-	count+=1;
-	delay_ms_nos(3);
-	mpu_get_data(&mpu_sensor);	
-	mpu_dmp_get_data(&(head_attitude.roll),&(head_attitude.pitch),&(head_attitude.yaw));
+	//count+=1;
+	//delay_ms_nos(1000);
+	if(microsecond()>=gyrotimer)
+	{
+		gyrotimer=microsecond()+gyro_count*1000;
+		tickcount=tickcount+1;
+		LED_TURN;
+		mpu_get(&head);
+		mpu_get(&rhand);
+		mpu_get(&lhand);
+		timer=microsecond()-gyrotimer-gyro_count*1000;
+	}
   }
   /* USER CODE END 3 */
 }
@@ -168,7 +171,34 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/**
+  * @brief   Get mpu
+	* @param   float gyro_x,gyro_y,gyro_z,angle_x,angle_y,angle_z;
+  * @retval  void
+  */
+void mpu_get(gyro_module* aim_gyro)
+{
+	SDA_GPIOx=aim_gyro->Gpio_Sda;
+	SDA_PIN=aim_gyro->Pin_Sda;
+	SCL_GPIOx=aim_gyro->Gpio_Scl;
+	SCL_PIN=aim_gyro->Pin_scl;
+    uint8_t buf[14];
+    if(IIC_MPU6050_Read_Len(MPU_ADDR,MPU_GYRO_XOUTH_REG,6,buf)==0)
+        //缩短时间，不解算姿态的情况下只获取所需的陀螺仪GYO3轴数据
+    {
+//如果要加速度值需要换寄存器
 
+        MPU6050.gx = (int16_t)(((buf[0]<<8) | buf[1])) ;//- MPU6050.gx_offset);
+        MPU6050.gy = (int16_t)(((buf[2]<<8) | buf[3])) ;//- MPU6050.gy_offset);
+        MPU6050.gz = (int16_t)(((buf[4]<<8) | buf[5])) ;//- MPU6050.gz_offset);
+
+
+    }
+    aim_gyro->gyro_x = MPU6050.gx / 32768.0f * 2000;//2000dps->rad/s
+    aim_gyro->gyro_y = MPU6050.gy / 32768.0f * 2000;
+    aim_gyro->gyro_z = MPU6050.gz / 32768.0f * 2000;
+	mpu_dmp_get_data(&(aim_gyro->pitch),&(aim_gyro->roll),&(aim_gyro->yaw));
+}
 /* USER CODE END 4 */
 
  /**

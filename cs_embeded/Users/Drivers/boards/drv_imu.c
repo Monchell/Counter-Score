@@ -351,5 +351,7 @@ void mpu_get_data(struct ahrs_sensor *sensor)
     sensor->wy = MPU6050.gy / 32768.0f * 2000;
     sensor->wz = MPU6050.gz / 32768.0f * 2000;
 }
+
+
 /************************ COPYRIGHT SCUT-ROBOTLAB *****END OF FILE*************/
 
