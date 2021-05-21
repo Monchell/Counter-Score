@@ -14,6 +14,7 @@
  /* Includes ------------------------------------------------------------------*/
 #include "System_Config.h"
 #include "drv_iic.h"
+#include "adc.h"
 #include "inv_mpu.h"
 #include "core_cm3.h"
 #include "drv_uart.h"
@@ -43,6 +44,8 @@ void board_config(void)
 	mpu_init(&head);
 	mpu_init(&rhand);
 	mpu_init(&lhand);
+	//adc初始化
+	HAL_ADCEx_Calibration_Start(&hadc1);
 	//串口初始化
 	Uart_Init(&huart1,usart1_rx_buff,USART1_RX_LENGTH,HC06handle);
 
