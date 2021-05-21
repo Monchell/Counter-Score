@@ -16,14 +16,17 @@
 #include "drv_iic.h"
 #include "inv_mpu.h"
 #include "core_cm3.h"
+#include "drv_uart.h"
 #include "stdio.h"
 
 
 /* Private variables ---------------------------------------------------------*/
-
+uint8_t usart1_rx_buff[USART1_RX_LENGTH];
 gyro_module head={GPIOA,GPIOA,GPIO_PIN_4,GPIO_PIN_3};
 gyro_module rhand={GPIOA,GPIOA,GPIO_PIN_2,GPIO_PIN_1};
 gyro_module lhand={GPIOB,GPIOB,GPIO_PIN_5,GPIO_PIN_4};
+
+
 
 /*Founctions------------------------------------------------------------------*/
 /**
@@ -31,7 +34,7 @@ gyro_module lhand={GPIOB,GPIOB,GPIO_PIN_5,GPIO_PIN_4};
   * @param   void
   * @retval  void
   */
-  
+
 void board_config(void)
 {
 	//时钟设置
@@ -41,9 +44,7 @@ void board_config(void)
 	mpu_init(&rhand);
 	mpu_init(&lhand);
 	//串口初始化
-	//Uart_Init(&huart1,usart1_rx_buff,USART1_RX_LENGTH,RecHandle);
-	//Uart_Init(&huart2,usart2_rx_buff,USART2_RX_LENGTH,dr16handle);
-	//Uart_Init(&huart4,usart4_rx_buff,USART4_RX_LENGTH,referee_Handle);
+	Uart_Init(&huart1,usart1_rx_buff,USART1_RX_LENGTH,HC06handle);
 
 }
 
@@ -67,4 +68,16 @@ void mpu_init(gyro_module* aim_gyro)
 	}		
 }
 
-
+/**
+  * @brief   电脑蓝牙接收
+  * @param   uint8_t,uint16_t
+  * @retval  uint32_t
+  */
+uint32_t HC06handle(uint8_t *buf, uint16_t len)
+{
+	if(len == 1&&buf[1]==1) {	
+		HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+		return 0;
+	} else
+	return 1;
+}

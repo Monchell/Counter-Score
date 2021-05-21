@@ -24,11 +24,9 @@ typedef struct
 	GPIO_TypeDef* Gpio_Sda, *Gpio_Scl;
 	uint16_t Pin_Sda,Pin_scl;
 	float gyro_x,gyro_y,gyro_z;
-	float roll,pitch,yaw;
+	float pitch,roll,yaw;
 }gyro_module;
 /* Private define ------------------------------------------------------------*/
-#define USART2_RX_LENGTH 100
-#define USART4_RX_LENGTH 150
 #define USART1_RX_LENGTH 100
 /* Private variables ---------------------------------------------------------*/
 extern gyro_module head;
@@ -38,7 +36,7 @@ extern gyro_module lhand;
 /* Private function declarations --------------------------------------------*/
 void board_config(void);
 void mpu_init(gyro_module* aim_gyro);
- 
+uint32_t HC06handle(uint8_t *buf, uint16_t len);
 	#ifdef __cplusplus
 }
 #endif

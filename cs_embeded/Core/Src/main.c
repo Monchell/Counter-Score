@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -31,6 +32,7 @@
 #include "drv_imu.h"
 #include "drv_iic.h"
 #include "inv_mpu.h"
+#include "string.h"
 #include "mahony_ahrs.h"
 
 /* USER CODE END Includes */
@@ -50,9 +52,16 @@ void mpu_get(gyro_module *aim_gyro);
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 #define gyro_count 30 
+#define button_count 5 
+#define send_count 20 
+
 uint32_t gyrotimer=0;
-uint32_t tickcount=0;
-uint32_t timer;
+uint32_t sendtimer=0;
+uint32_t buttontimer=0;
+
+uint8_t send_buff[30];
+uint8_t buttonstate=0;
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -100,13 +109,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   LED_OFF;
   board_config();  
   gyrotimer=Get_SystemTimer();
+  buttontimer=Get_SystemTimer();
+  sendtimer=Get_SystemTimer();
   LED_ON;
   /* USER CODE END 2 */
 
@@ -117,17 +128,30 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	//count+=1;
-	//delay_ms_nos(1000);
+	//HAL_UART_Transmit(&huart1,&data,1,0xff);
+	  
+	  
 	if(microsecond()>=gyrotimer)
 	{
 		gyrotimer=microsecond()+gyro_count*1000;
-		tickcount=tickcount+1;
-		LED_TURN;
 		mpu_get(&head);
 		mpu_get(&rhand);
 		mpu_get(&lhand);
-		timer=microsecond()-gyrotimer-gyro_count*1000;
+	}
+	
+	if(microsecond()>=buttontimer)
+	{
+		buttontimer=microsecond()+button_count*1000;
+	}
+	
+	if(microsecond()>=sendtimer)
+	{
+		memcpy(&send_buff[0],&head.pitch,6);
+		memcpy(&send_buff[6],&rhand.pitch,6);
+		memcpy(&send_buff[12],&lhand.pitch,6);
+		memcpy(&send_buff[18],&buttonstate,8);
+		
+		sendtimer=microsecond()+send_count*1000;
 	}
   }
   /* USER CODE END 3 */
