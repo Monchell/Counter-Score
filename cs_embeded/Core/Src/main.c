@@ -33,13 +33,31 @@
 #include "drv_imu.h"
 #include "drv_iic.h"
 #include "inv_mpu.h"
+#include <stdio.h>
 #include "string.h"
 #include "mahony_ahrs.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+#ifdef __GNUC__
+/* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
+set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+extern "C"
+{
+PUTCHAR_PROTOTYPE
+{
+    /* Place your implementation of fputc here */
+    /* e.g. write a character to the EVAL_COM1 and Loop until the end of transmission */
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+
+    return ch;
+}
+}
 typedef struct 
 {
 	uint32_t adc_now;//使用0.5指数形滤波方式
@@ -176,6 +194,7 @@ int main(void)
 		memcpy(&send_buff[26],&adc_out,16);//头的三轴	
 		send_buff[42]=222;
 		HAL_UART_Transmit_DMA(&huart1,send_buff,43);
+		//printf("%f\n",adc_out);
 	}
 	//adc读取任务
 	if(microsecond()>=adctimer)
@@ -274,7 +293,7 @@ float adc_update(adc_module* aimadc,uint32_t adc_value)
 	aimadc->adc_sum = aimadc->adc_sum - aimadc->adc_tmp[point];//剔除历史末端
 	aimadc->adc_tmp[point]=adc_value; //末端变成首部赋予新值
 	aimadc->adc_sum = aimadc->adc_sum + aimadc->adc_tmp[point];//添加新值
-	aimadc->adc_out =(float)((aimadc->adc_sum/5)/4096*3.3);//为归一化.3.3化了;
+	aimadc->adc_out =((float)aimadc->adc_sum/5)/4096*3.3;//为归一化.3.3化了;
 	point++;
 	if(point==5)point=0;
 	aimadc->point=point;

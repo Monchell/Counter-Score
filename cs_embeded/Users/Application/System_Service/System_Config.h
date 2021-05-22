@@ -37,6 +37,9 @@ extern gyro_module lhand;
 void board_config(void);
 void mpu_init(gyro_module* aim_gyro);
 uint32_t HC06handle(uint8_t *buf, uint16_t len);
+
+
+
 	#ifdef __cplusplus
 }
 #endif
