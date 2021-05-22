@@ -182,19 +182,21 @@ int main(void)
 	{
 		buttontimer=microsecond()+button_count*1000;
 	}
-	//蓝牙发送任务
+	//蓝牙发送任务，5ms为任务周期
 	if(microsecond()>=sendtimer)
 	{
 		sendtimer=microsecond()+send_count*1000;
-		memcpy(&send_buff[0],&head.pitch,6); //头三轴
+		memcpy(&send_buff[0],&head.pitch,6); //头三轴俯仰，横滚，航向，float型各两个字节，下同
 		memcpy(&send_buff[6],&rhand.pitch,6);//右手三轴
 		memcpy(&send_buff[12],&lhand.pitch,6);//左手三轴
 		
-		memcpy(&send_buff[18],&buttonstate,8);//上拉按键状态，按下对应位为0低电平，否则为1高电平
-		memcpy(&send_buff[26],&adc_out,16);//头的三轴	
-		send_buff[42]=222;
-		HAL_UART_Transmit_DMA(&huart1,send_buff,43);
-		//printf("%f\n",adc_out);
+		memcpy(&send_buff[18],&buttonstate,1);//上拉按键状态，一个字节，按下对应位为0低电平，否则为1高电平，
+		//第0位到第4位对应B4-B8，其中B8是开枪，456按顺序向下排列，7为狙击键（鼠标左键）
+		memcpy(&send_buff[19],&adc_out,2);//弯曲传感器，float型两个字节
+		send_buff[21]=222;//包尾为222
+		
+		HAL_UART_Transmit_DMA(&huart1,send_buff,22);//一个包传输22个字节
+		//printf("%f\n",adc_out);可使用printf进行调试
 	}
 	//adc读取任务
 	if(microsecond()>=adctimer)
