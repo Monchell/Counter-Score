@@ -80,6 +80,7 @@ float adc_update(adc_module* aimadc,uint32_t adc_value);
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+//时钟
 #define gyro_count 30 
 #define button_count 5
 #define adc_count 1
@@ -90,10 +91,14 @@ uint32_t sendtimer=0;
 uint32_t buttontimer=0;
 uint32_t adctimer=0;
 
-
+//串口发送数据
 uint8_t send_buff[50];
 
-uint8_t buttonstate=0;
+//按键情况
+uint8_t keystate=0;
+uint8_t key0,key1,key2,key3,key4;
+
+//adc电压值
 uint32_t adc_value=0;
 
 adc_module aimadc;
@@ -181,6 +186,12 @@ int main(void)
 	if(microsecond()>=buttontimer)
 	{
 		buttontimer=microsecond()+button_count*1000;
+		key0=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4);
+		key1=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5)>>1;
+		key2=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6)>>2;
+		key3=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7)>>3;
+		key4=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_8)>>4;	
+		keystate=key0+key1+key2+key3+key4;
 	}
 	//蓝牙发送任务，5ms为任务周期
 	if(microsecond()>=sendtimer)
@@ -190,7 +201,7 @@ int main(void)
 		memcpy(&send_buff[6],&rhand.pitch,6);//右手三轴
 		memcpy(&send_buff[12],&lhand.pitch,6);//左手三轴
 		
-		memcpy(&send_buff[18],&buttonstate,1);//上拉按键状态，一个字节，按下对应位为0低电平，否则为1高电平，
+		memcpy(&send_buff[18],&keystate,1);//上拉按键状态，一个字节，按下对应位为0低电平，否则为1高电平，
 		//第0位到第4位对应B4-B8，其中B8是开枪，456按顺序向下排列，7为狙击键（鼠标左键）
 		memcpy(&send_buff[19],&adc_out,2);//弯曲传感器，float型两个字节
 		send_buff[21]=222;//包尾为222

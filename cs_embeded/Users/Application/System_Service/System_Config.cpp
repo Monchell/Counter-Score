@@ -23,9 +23,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 uint8_t usart1_rx_buff[USART1_RX_LENGTH];
-gyro_module head={GPIOA,GPIOA,GPIO_PIN_4,GPIO_PIN_3};
-gyro_module rhand={GPIOA,GPIOA,GPIO_PIN_2,GPIO_PIN_1};
-gyro_module lhand={GPIOB,GPIOB,GPIO_PIN_5,GPIO_PIN_4};
+gyro_module head={GPIOA,GPIOA,GPIO_PIN_2,GPIO_PIN_1};
+gyro_module rhand={GPIOA,GPIOA,GPIO_PIN_6,GPIO_PIN_5};
+gyro_module lhand={GPIOA,GPIOA,GPIO_PIN_4,GPIO_PIN_3};
 
 
 
