@@ -338,7 +338,7 @@
               <MiscControls>--cpp11</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB,STM32F103xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;              ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;              ../Drivers/STM32F1xx_HAL_Driver/Inc;              ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;              ../Drivers/CMSIS/Include;              ..\Users\Drivers\boards;              ..\Users\Drivers\boards\eMPL;              ..\Users\Middlewares\modules_consist\Algorithm;              ..\Users\Application\System_Service</IncludePath>
+              <IncludePath>../Core/Inc;               ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;               ../Drivers/STM32F1xx_HAL_Driver/Inc;               ../Drivers/CMSIS/Device/ST/STM32F1xx/Include;               ../Drivers/CMSIS/Include;               ..\Users\Drivers\boards;               ..\Users\Drivers\boards\eMPL;               ..\Users\Middlewares\modules_consist\Algorithm;               ..\Users\Application\System_Service</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

@@ -84,7 +84,7 @@ float adc_update(adc_module* aimadc,uint32_t adc_value);
 #define gyro_count 30 
 #define button_count 5
 #define adc_count 1
-#define send_count 5
+#define send_count 20
 
 uint32_t gyrotimer=0;
 uint32_t sendtimer=0;
@@ -128,6 +128,10 @@ void SystemClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
+  
+float tm1;
+float tm2;
+float tm3;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -187,27 +191,27 @@ int main(void)
 	{
 		buttontimer=microsecond()+button_count*1000;
 		key0=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4);
-		key1=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5)>>1;
-		key2=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6)>>2;
-		key3=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7)>>3;
-		key4=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_8)>>4;	
+		key1=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5)<<1;
+		key2=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6)<<2;
+		key3=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7)<<3;
+		key4=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_9)<<4;	
 		keystate=key0+key1+key2+key3+key4;
 	}
 	//蓝牙发送任务，5ms为任务周期
 	if(microsecond()>=sendtimer)
 	{
 		sendtimer=microsecond()+send_count*1000;
-		memcpy(&send_buff[0],&head.pitch,6); //头三轴俯仰，横滚，航向，float型各两个字节，下同
-		memcpy(&send_buff[6],&rhand.pitch,6);//右手三轴
-		memcpy(&send_buff[12],&lhand.pitch,6);//左手三轴
+		memcpy(&send_buff[0],&head.pitch,12); //头三轴俯仰，横滚，航向，float型各两个字节，下同
+		memcpy(&send_buff[12],&rhand.pitch,12);//右手三轴
+		memcpy(&send_buff[24],&lhand.pitch,12);//左手三轴
 		
-		memcpy(&send_buff[18],&keystate,1);//上拉按键状态，一个字节，按下对应位为0低电平，否则为1高电平，
+		memcpy(&send_buff[36],&keystate,1);//上拉按键状态，一个字节，按下对应位为0低电平，否则为1高电平，
 		//第0位到第4位对应B4-B8，其中B8是开枪，456按顺序向下排列，7为狙击键（鼠标左键）
-		memcpy(&send_buff[19],&adc_out,2);//弯曲传感器，float型两个字节
-		send_buff[21]=222;//包尾为222
-		
-		HAL_UART_Transmit_DMA(&huart1,send_buff,22);//一个包传输22个字节
-		//printf("%f\n",adc_out);可使用printf进行调试
+		memcpy(&send_buff[37],&adc_out,4);//弯曲传感器，float型两个字节
+		send_buff[41]=222;//包尾为222		
+		HAL_UART_Transmit_DMA(&huart1,send_buff,42);//一个包传输42个字节
+		//printf("hello world\n");//可使用printf进行调试
+		//HAL_UART_Transmit_DMA(&huart1,&keystate,1);//一个包传输42个字节
 	}
 	//adc读取任务
 	if(microsecond()>=adctimer)
